@@ -70,14 +70,14 @@ class Order(val emit: Events) : Events {
 }
   ```
 2. Following application classes are generated based on your context code before build:
-  - Aggregate
-  - Aggregate factory
-  - Aggregate root entity test stub
-  - Application service (based on commands)
-  - Domain command value objects
-  - Domain configurer
-  - Domain event value objects
-  - Domain service test stub and possibly in-memory implementation
+   - Aggregate
+   - Aggregate factory
+   - Aggregate root entity test stub
+   - Application service (based on commands)
+   - Domain command value objects
+   - Domain configurer
+   - Domain event value objects
+   - Domain service test stub and possibly in-memory implementation
 3. Now you can create unit tests for the context. Skipping this now for simplicity.
 4. Implement your interfaces and create custom event handlers in the infrastructure layer:
   ```kt
@@ -92,8 +92,8 @@ object QuotationSender : EventHandler<QuotationOffered>(QuotationOffered::class)
   ```
 5. Test your implementations.
 6. Build the application with Dukt libraries:
-  - `dukt-app` Mandatory application base classes command and event processing
-  - Separate package for each Event store implementation
+   - `dukt-app` Mandatory application base classes command and event processing
+   - Separate package for each Event store implementation
 7. Thats it! Now application is ready for testing and deploying.
 
 ## Planned later
