@@ -1,27 +1,31 @@
 # Domain-driven design using Kotlin
+
+[![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.6.10-blue.svg?logo=kotlin)](http://kotlinlang.org)
+
 This framework uses CQRS and ES patterns and is coded using [Multiplatform](https://kotlinlang.org/docs/multiplatform.html) Kotlin. It's inspired by [AxonFramework](https://github.com/AxonFramework/AxonFramework) and [EventFlow](https://github.com/eventflow/EventFlow). Domain logic can be at the client side and/or it can be used from the server.
 
 ## Features
-- Supports all platforms (Android, iOS, JS, JVM, Linux, macOS, tvOS, watchOS, Wasm, Windows)
+- Supports JS and JVM platforms
 - Fast as possible
-  - Fully reflectionless and `kotlin-reflect` not needed
+  - `kotlin-reflect` not needed
   - Dependency injection at build time
-  - Minifiable code and [Proguard](https://github.com/Guardsquare/proguard) support
+  - [Proguard](https://github.com/Guardsquare/proguard) support
   - Commands are handled simultaneously. Transaction locks only single aggregate by ID and there isn't global sequences.
-  - Asyncronous event handling using [Coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
+  - Asynchronous event handling using [Coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
 - [Kotlin Serialization](https://github.com/Kotlin/kotlinx.serialization)
-  - Fast reflectionless serialization
+  - Fast compile-time serialization
   - Storage size is minimal when used [Protocol Buffers](https://developers.google.com/protocol-buffers)
 - Code generation with Gradle plugin
 - [Ktor](https://ktor.io/) support
   - Server-side authorization
 - [Kotest](https://kotest.io/) support
 
-Currently this framework is at early development stage :(
+Currently, this framework is at early development stage :(
 
 ## Learn by simple example
 1. Write your bounded context code first. For example:
-  ```kt
+  ```kotlin
 /** Sales context **/
 package com.example.sales
 
@@ -75,12 +79,12 @@ class Order(val emit: Events) : Events {
    - Aggregate root entity test stub
    - Application service (based on commands)
    - Domain command value objects
-   - Domain configurer
+   - Domain configurator
    - Domain event value objects
    - Domain service test stub and possibly in-memory implementation
 3. Now you can create unit tests for the context. Skipping this now for simplicity.
 4. Implement your interfaces and create custom event handlers in the infrastructure layer:
-  ```kt
+  ```kotlin
 // Domain service implementation
 class SalesBansImpl(vararg ban: VatNo) : SalesBans, Set<VatNo> by ban.toSet()
 
@@ -94,8 +98,9 @@ object QuotationSender : EventHandler<QuotationOffered>(QuotationOffered::class)
 6. Build the application with Dukt libraries:
    - `dukt-app` Mandatory application base classes command and event processing
    - Separate package for each Event store implementation
-7. Thats it! Now application is ready for testing and deploying.
+7. That's it! Now application is ready for testing and deploying.
 
 ## Planned later
 - Saga support
+- Support for other platforms (Android, iOS, Linux, macOS, tvOS, watchOS, Wasm, Windows)
 - Code migration from/to other frameworks/languages
