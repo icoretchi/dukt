@@ -21,8 +21,6 @@ This framework uses CQRS and ES patterns and is coded using [Multiplatform](http
   - Server-side authorization
 - [Kotest](https://kotest.io/) support
 
-Currently, this framework is at early development stage :(
-
 ## Learn by simple example
 1. Write your bounded context code first. For example:
   ```kotlin
@@ -99,6 +97,34 @@ object QuotationSender : EventHandler<QuotationOffered>(QuotationOffered::class)
    - `dukt-app` Mandatory application base classes command and event processing
    - Separate package for each Event store implementation
 7. That's it! Now application is ready for testing and deploying.
+
+## Installation instructions
+
+1. Dukt doesn't have releases yet, so you have to publish artifacts to local maven using task `publishToMavenLocal`.
+2. Apply Dukt plugin and define project group. See usage in `example` project.
+  ```kotlin
+plugins {
+    kotlin("multiplatform") version "1.6.10"
+    id("app.ddd.dukt") version "0.1.0-SNAPSHOT"
+}
+
+group = "com.example"
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+kotlin {
+    jvm()
+}
+  ```
+3. Generate support classes to `build\generated` directory using task `generateContext`.
+4. Generate MarkDown documentation to `build\generated` directory using task `generateDocumentation`.
+
+## Todo
+
+- Use sealed interface for commands and events (to simplify *when* clauses)
 
 ## Planned later
 - Saga support

@@ -1,2 +1,2 @@
 rootProject.name = "dukt"
-include("generator", "plugin")
+include("api", "generator", "plugin")
