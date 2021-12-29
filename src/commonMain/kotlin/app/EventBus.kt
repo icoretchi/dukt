@@ -13,9 +13,9 @@ interface EventBus {
     /**
      * Dispatch events emitted from single aggregate
      */
-    suspend fun dispatch(messages: List<EventMessage>)
+    suspend fun <E : Any> dispatch(messages: List<EventMessage<E>>)
 
-    operator fun minus(handler: EventHandler<*>): Boolean
+    operator fun <E : Any> minus(handler: EventHandler<E>): Boolean
 
-    operator fun plus(handler: EventHandler<*>): Boolean
+    operator fun <E : Any> plus(handler: EventHandler<E>): Boolean
 }

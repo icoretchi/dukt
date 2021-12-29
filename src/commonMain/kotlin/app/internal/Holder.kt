@@ -4,7 +4,7 @@ import app.ddd.app.common.missingService
 import kotlin.reflect.KClass
 
 /**
- * Singleton holder that is lazily initialized
+ * Singleton holder that is late initialized
  */
 class Holder<S : Any>(private val type: KClass<S>) {
     private var instance: S? = null

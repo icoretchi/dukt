@@ -14,7 +14,8 @@ import kotlin.reflect.KClass
 class LocalEventBus(private val eventStore: EventStore) : EventBus {
     private val handlerRegistry = mutableMapOf<KClass<*>, MutableList<EventHandler<*>>>()
 
-    override suspend fun dispatch(messages: List<EventMessage>) {
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun <E : Any> dispatch(messages: List<EventMessage<E>>) {
         // Todo add async
         //coroutineScope {
             //val storeJob = launch {
@@ -24,16 +25,18 @@ class LocalEventBus(private val eventStore: EventStore) : EventBus {
             messages.map { message ->
                 val messageJobs = getHandlers(message.event::class).map { handler ->
                     //launch {
-                        handler.handle(message)
+                        (handler as EventHandler<E>).handle(message)
                     //}
                 }
             }
         //}
     }
 
-    private fun getHandlers(eventType: KClass<*>) = handlerRegistry.getOrPut(eventType) { mutableListOf() }
+    @Suppress("UNCHECKED_CAST")
+    private fun <E : Any> getHandlers(eventType: KClass<E>) =
+        handlerRegistry.getOrPut(eventType) { mutableListOf() } as MutableList<EventHandler<E>>
 
-    override fun minus(handler: EventHandler<*>) = getHandlers(handler.eventType).remove(handler)
+    override fun <E : Any> minus(handler: EventHandler<E>) = getHandlers(handler.eventType).remove(handler)
 
-    override fun plus(handler: EventHandler<*>) = getHandlers(handler.eventType).add(handler)
+    override fun <E : Any> plus(handler: EventHandler<E>) = getHandlers(handler.eventType).add(handler)
 }

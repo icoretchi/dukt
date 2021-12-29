@@ -14,10 +14,10 @@ interface EventStore {
     /**
      * Get all aggregate event messages
      */
-    suspend fun get(id: Uuid): List<EventMessage>
+    suspend fun <E : Any> get(id: Uuid): List<EventMessage<E>>
 
     /**
      * Store at least one event emitted from single aggregate
      */
-    suspend fun add(messages: List<EventMessage>)
+    suspend fun add(messages: List<EventMessage<*>>)
 }

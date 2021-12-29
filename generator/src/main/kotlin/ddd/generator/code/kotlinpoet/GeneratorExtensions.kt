@@ -47,25 +47,23 @@ fun Application.asTestType(domainServices: List<ClassName>): TypeSpec {
         .build()
 }
 
-val AggregateEvent.asType get() =
-    (if (properties.isEmpty()) TypeSpec.objectBuilder(name).addAnnotation(serializableType)
-    else TypeSpec.valueClassBuilder(name, properties).addAnnotation(serializableType)).build()
+fun AggregateEvent.asType(eventInterface: TypeName) =
+    (if (properties.isEmpty()) TypeSpec.objectBuilder(name) else TypeSpec.valueClassBuilder(name, properties))
+        .addAnnotation(serializableType).addSuperinterface(eventInterface).build()
 
 val AggregateRoot.asAggregateClassName get() = ClassName(appModule, name + AGGREGATE)
 
 val AggregateRoot.asAggregateFactoryClassName get() = ClassName(appModule, name + AGGREGATE_FACTORY)
 
 val AggregateRoot.asAggregateType get(): TypeSpec {
-    val apply = FunSpec.overrideBuilder("apply", "event" to ANY)
+    val apply = FunSpec.overrideBuilder("apply", "event" to asEventInterfaceClassName)
         .beginControlFlow("when(event)")
     events.forEach { event -> apply.addStatement(
         "is %T -> root.${event.method.name}(${event.properties.joinToString { "event.${it.name}" }})", event.asClassName
     ) }
-    apply.addStatement("""else -> %M(event, "event")""",
-        MemberName("app.ddd.app.common", "throwUnsupported"))
-        .endControlFlow()
+    apply.endControlFlow()
     return TypeSpec.classBuilder(asAggregateClassName, ofType)
-        .superclass(aggregateType.parameterizedBy(asClassName))
+        .superclass(aggregateType.parameterizedBy(asClassName, asEventInterfaceClassName))
         .addSuperclassConstructorParameter("of")
         .addSuperinterface(eventsInterface.asClassName)
         .addFunction(apply.build())
@@ -83,15 +81,15 @@ val AggregateRoot.asAggregateType get(): TypeSpec {
 }
 
 val AggregateRoot.asAggregateFactoryType get() = TypeSpec.objectBuilder(asAggregateFactoryClassName)
-    .superclass(aggregateFactoryType.parameterizedBy(asClassName))
+    .superclass(aggregateFactoryType.parameterizedBy(asClassName, asEventInterfaceClassName))
     .addSuperclassConstructorParameter("%T::class", asClassName)
-    .addFunction(FunSpec.overrideBuilder("create", asAggregateClassName, "of" to ofType)
+    .addFunction(FunSpec.overrideBuilder("create", "of" to ofType)
         .addStatement("return %T(of).also { it.root = %T(it) }", asAggregateClassName, asClassName)
         .build())
     .build()
 
 val AggregateRoot.asServiceType get() = TypeSpec.objectBuilder(name + SERVICE)
-    .superclass(applicationServiceType.parameterizedBy(asClassName))
+    .superclass(applicationServiceType.parameterizedBy(asClassName, asEventInterfaceClassName))
     .addSuperclassConstructorParameter("%T", asAggregateFactoryClassName)
     .addFunctions(commands.map {
         with(it) {
@@ -99,13 +97,18 @@ val AggregateRoot.asServiceType get() = TypeSpec.objectBuilder(name + SERVICE)
                 .addModifiers(KModifier.SUSPEND)
                 .addParameter("of", ofType)
                 .addParameters(properties.asParameters)
-                .addStatement("tx(of) { it.${method.name}(${properties.joinNames()}) }")
+                .addStatement("tx(of) { ${method.name}(${properties.joinNames()}) }")
                 .build()
         }
     })
     .build()
 
-val AggregateRoot.asEventTypes get() = events.map { it.asType }
+val AggregateRoot.asEventInterfaceClassName get() = ClassName(appModule, "${name}Event")
+
+val AggregateRoot.asEventTypes get() = asEventInterfaceClassName.let { className ->
+    listOf(TypeSpec.interfaceBuilder(className.simpleName).addModifiers(KModifier.SEALED).build()) +
+            events.map { it.asType(className) }
+}
 
 fun BoundedContext.file(name: String, action: (FileSpec.Builder) -> Unit): FileSpec {
     val builder = fileBuilder(name)

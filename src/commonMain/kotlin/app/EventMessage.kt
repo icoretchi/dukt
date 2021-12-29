@@ -2,9 +2,9 @@ package app.ddd.app
 
 import com.benasher44.uuid.Uuid
 
-data class EventMessage(
+data class EventMessage<E : Any>(
     val batch: Int,
-    val event: Any,
+    val event: E,
     val eventName: String,
     val sequence: Int,
     val source: Uuid,

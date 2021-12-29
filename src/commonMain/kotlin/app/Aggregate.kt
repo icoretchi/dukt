@@ -1,13 +1,13 @@
 package app.ddd.app
 
-abstract class Aggregate<R : Any>(target: Of) {
+abstract class Aggregate<R : Any, E : Any>(target: Of) {
 
     /**
      * Current transaction order number in this aggregate.
      */
     var batch = 1
 
-    private val transaction = mutableListOf<EventMessage>()
+    private val transaction = mutableListOf<EventMessage<E>>()
 
     val id = target.id
 
@@ -22,16 +22,16 @@ abstract class Aggregate<R : Any>(target: Of) {
 
     var user = target.user
 
-    abstract fun apply(event: Any)
+    abstract fun apply(event: E)
 
-    fun commit() : List<EventMessage> {
+    fun commit() : List<EventMessage<E>> {
         val events = transaction.toList()
         transaction.clear()
         ++batch
         return events
     }
 
-    protected operator fun plus(event: Any) {
+    protected operator fun plus(event: E) {
         transaction.add(EventMessage(batch, event, event::class.simpleName!!, ++sequence, id, rootName, user))
     }
 

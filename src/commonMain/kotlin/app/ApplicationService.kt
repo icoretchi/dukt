@@ -1,16 +1,16 @@
 package app.ddd.app
 
-abstract class ApplicationService<R : Any>(private val factory: AggregateFactory<R>) {
+abstract class ApplicationService<R : Any, E : Any>(private val factory: AggregateFactory<R, E>) {
     private val bus by lazy { EventBus.holder.get() }
 
     private val repository by lazy { AggregateRepository[factory] }
 
-    protected suspend fun <T> tx(of: Of, action: (root: R) -> T): T {
+    protected suspend fun <T> tx(of: Of, action: R.() -> T): T {
         val aggregate = repository.get(of)
-        val events: List<EventMessage>
+        val events: List<EventMessage<E>>
         val result: T
         try {
-            result = action(aggregate.root)
+            result = aggregate.root.action()
             events = aggregate.commit()
             repository + aggregate
         } catch (exception: Exception) {

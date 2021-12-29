@@ -122,11 +122,9 @@ kotlin {
 3. Generate support classes to `build\generated` directory using task `generateContext`.
 4. Generate MarkDown documentation to `build\generated` directory using task `generateDocumentation`.
 
-## Todo
-
-- Use sealed interface for commands and events (to simplify *when* clauses)
-
 ## Planned later
 - Saga support
+- Dynamic exception generation based on static `throw('TypeName', params)` function call in aggregate root.
+- Command may return value
 - Support for other platforms (Android, iOS, Linux, macOS, tvOS, watchOS, Wasm, Windows)
 - Code migration from/to other frameworks/languages
